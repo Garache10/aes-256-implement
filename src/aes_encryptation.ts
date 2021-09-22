@@ -4,34 +4,49 @@ const bufferEncryptation = 'hex';
 const EncodingType = 'base64'
 
 class AesEncryptation {
-    AesKey_: any;
-    AesKey: any;
-    AesIV: any;
-    
+    SharedKey: string;
+    AesIV: Buffer;
+
     constructor() {
         const Encryptkey = crypto.createECDH('secp256k1');
         Encryptkey.generateKeys();
         const publicKey = Encryptkey.getPublicKey().toString(EncodingType);
-
-        const Decryptkey = crypto.createECDH('secp256k1');
-        Decryptkey.generateKeys();
-        const _publicKey = Decryptkey.getPublicKey().toString(EncodingType);
-
-        this.AesKey = Encryptkey.computeSecret(publicKey, EncodingType, bufferEncryptation);
-        this.AesKey_ = Decryptkey.computeSecret(_publicKey, EncodingType, bufferEncryptation);
+        this.SharedKey = Encryptkey.computeSecret(publicKey, EncodingType, bufferEncryptation);
         this.AesIV = crypto.randomBytes(16);
     }
 
+    //this encryption generates a payload too it should be two methods but this is a demo
     encrypt(jsonObject: Object): string {
         const val = JSON.stringify(jsonObject);
-        const key = Buffer.from(this.AesKey, bufferEncryptation);
+        const key = Buffer.from(this.SharedKey, bufferEncryptation);
         const cipher = crypto.createCipheriv(encryptationType, key, this.AesIV);
         let encrypted = cipher.update(val, 'utf-8', bufferEncryptation);
         encrypted += cipher.final(bufferEncryptation);
-        return encrypted;
+        const payload = this.AesIV.toString('hex') + encrypted + cipher.getAuthTag().toString('hex');
+        return Buffer.from(payload, 'hex').toString('base64');
     }
 
-    //TODO: Method to decrypt string
+
+    decript(sharedKey:string, payload:string): string {
+        const hex_payload = Buffer.from(payload, 'base64').toString('hex');
+        const payload_iv = hex_payload.substr(0, 32);
+        const payload_encrypted = hex_payload.substr(32, hex_payload.length - 32 - 32);
+        const payload_auth_tag = hex_payload.substr(hex_payload.length - 32, 32);
+
+        const decipher = crypto.createDecipheriv(
+            encryptationType,
+            Buffer.from(sharedKey, bufferEncryptation),
+            Buffer.from(payload_iv, bufferEncryptation)
+        );
+
+        decipher.setAuthTag(Buffer.from(payload_auth_tag, 'hex'));
+
+        let decrypted = decipher.update(payload_encrypted, 'hex', 'utf8');
+        decrypted += decipher.final('utf8');
+
+        return decrypted;
+    }
+
 }
 
 export default AesEncryptation;
