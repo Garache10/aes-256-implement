@@ -27,7 +27,7 @@ class AesEncryptation {
     }
 
 
-    decript(sharedKey:string, payload:string): string {
+    decrypt(sharedKey:string, payload:string): string {
         const hex_payload = Buffer.from(payload, 'base64').toString('hex');
         const payload_iv = hex_payload.substr(0, 32);
         const payload_encrypted = hex_payload.substr(32, hex_payload.length - 32 - 32);
