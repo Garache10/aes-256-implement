@@ -1,13 +1,12 @@
 import AesEncryptation from './aes_encryptation';
 
-const AesBob = new AesEncryptation();
-const AesAlice = new AesEncryptation();
-
-const Pass = "ContrasenaMuyFuerte";
-const Encrypted = AesBob.encrypt(Pass);
+const AesEncrypt = new AesEncryptation();
+const AesDecrypt = new AesEncryptation();
+const Pass = "ContrasenaMuyFuerte"; //This const represents Password to encrypt
+const Encrypted = AesEncrypt.encrypt(Pass);
 
 console.table({
     "Pass" : Pass,
     "Pass Encrypted " : Encrypted,
-    "Pass Decrypted " : AesAlice.decrypt(AesBob.SharedKey, Encrypted),
+    "Pass Decrypted " : AesDecrypt.decrypt(AesEncrypt.SharedKey, Encrypted)
 });

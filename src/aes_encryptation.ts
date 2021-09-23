@@ -26,24 +26,20 @@ class AesEncryptation {
         return Buffer.from(payload, 'hex').toString('base64');
     }
 
-
+    //this method decrypts from a payload that it receives by parameter
     decrypt(sharedKey:string, payload:string): string {
         const hex_payload = Buffer.from(payload, 'base64').toString('hex');
         const payload_iv = hex_payload.substr(0, 32);
         const payload_encrypted = hex_payload.substr(32, hex_payload.length - 32 - 32);
         const payload_auth_tag = hex_payload.substr(hex_payload.length - 32, 32);
-
         const decipher = crypto.createDecipheriv(
             encryptationType,
             Buffer.from(sharedKey, bufferEncryptation),
             Buffer.from(payload_iv, bufferEncryptation)
         );
-
         decipher.setAuthTag(Buffer.from(payload_auth_tag, 'hex'));
-
         let decrypted = decipher.update(payload_encrypted, 'hex', 'utf8');
         decrypted += decipher.final('utf8');
-
         return decrypted;
     }
 
