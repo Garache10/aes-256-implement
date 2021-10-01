@@ -16,8 +16,8 @@ class AesEncryptation {
     }
 
     //this encryption generates a payload too it should be two methods but this is a demo
-    encrypt(jsonObject: Object): string {
-        const val = JSON.stringify(jsonObject);
+    encrypt(jsonObject: string): string {
+        const val = jsonObject;
         const key = Buffer.from(this.SharedKey, bufferEncryptation);
         const cipher = crypto.createCipheriv(encryptationType, key, this.AesIV);
         let encrypted = cipher.update(val, 'utf-8', bufferEncryptation);
